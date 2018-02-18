@@ -1,15 +1,413 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace _562Homework2
 {
+    class Results
+    {
+        private int testNumber;
+        string benchMark;
+        string name;
+        double IPC;
+        double dCacheMissRate;
+        int iCache;
+        int dCache;
+        int setAssociative;
+        int lineSize;
+        double IPCdifference;
+        double dCachedifference;
+        public Results(int testNumber) => this.testNumber = testNumber;
+        public int TestNumber { get => testNumber; set => testNumber = value; }
+        public double DCacheMissRate { get => dCacheMissRate; set => dCacheMissRate = value; }
+        public string Name { get => name; set => name = value; }
+        public int ICache { get => iCache; set => iCache = value; }
+        public int DCache { get => dCache; set => dCache = value; }
+        public double IPC1 { get => IPC; set => IPC = value; }
+        public string BenchMark { get => benchMark; set => benchMark = value; }
+        public int SetAssociative { get => setAssociative; set => setAssociative = value; }
+        public int LineSize { get => lineSize; set => lineSize = value; }
+        public double IPCdifference1 { get => IPCdifference; set => IPCdifference = value; }
+        public double DCachedifference { get => dCachedifference; set => dCachedifference = value; }
+    }
+    class ResultsComputer
+    {
+        List<Results> listOfResults;
+        Results bestIPCR;
+        Results bestdCache;
+        Results baseR;
+        string BenchMark()
+        {
+            return baseR.BenchMark;
+        }
+
+        double BaseIPC()
+        {
+            if(object.ReferenceEquals(null, baseR))
+            {
+                Console.WriteLine("Error, base does not exist when attempting to access baseIPC");
+                return -1.0;
+            }
+            return baseR.IPC1;
+        }
+        double bestIPC() => bestIPCR.IPC1;
+        double IPCImpovement()
+        {
+            return 100 * bestIPCR.IPCdifference1;
+        }
+        double DCachImprovement()
+        {
+            return 100 * bestdCache.DCachedifference;
+        }
+        string BestIPCConfig()
+        {
+            return bestIPCR.DCache + "-" + bestIPCR.SetAssociative + "-" + bestIPCR.LineSize;
+        }
+        string bestdCacheConfig()
+        {
+            return bestdCache.DCache + "-" + bestdCache.SetAssociative + "-" + bestdCache.LineSize;
+        }
+        double basedCacheMissRate() => baseR.DCacheMissRate;
+        double bestdCacheMissRate() => bestdCache.DCacheMissRate;
+        public ResultsComputer()
+        {
+            listOfResults = new List<Results>();
+        }
+        public Results ResultExists(string fileName)
+        {
+            if(object.ReferenceEquals(null, fileName))
+            {
+                Console.WriteLine("Error, gave null string for file name");
+                return null;
+            }
+            int testNumber = int.Parse(Regex.Match(fileName, @"\d+").Value, NumberFormatInfo.InvariantInfo);
+            //Convert.ToInt32(Regex.Replace(fileName, "-?[0-9]+", ""));
+            for (int i =0; i < listOfResults.Count; i++)
+            {
+                if(listOfResults[i].TestNumber == testNumber)
+                {
+                    return listOfResults[i];
+                }
+            }
+            Results temporaryResult = new Results(testNumber);
+            temporaryResult.Name = fileName;
+            listOfResults.Add(temporaryResult);
+            return temporaryResult;
+        }
+        public Results setBase()
+        {
+            int iCache = 32;
+            int dCache = 32;
+            int assoc = 4;
+            int linesize = 64;
+            for(int i = 0; i < listOfResults.Count; i++)
+            {
+                if(listOfResults[i].DCache == dCache && listOfResults[i].SetAssociative == assoc
+                    && listOfResults[i].LineSize == linesize && listOfResults[i].ICache == iCache)
+                {
+
+                    this.baseR = listOfResults[i];
+                   
+                    break;
+                }
+            }
+            if(this.baseR == null)
+            {
+                Console.WriteLine("Error: could not find basline");
+                return null;
+            }
+            return baseR;
+        }
+        public void findBest()
+        {
+            if (object.ReferenceEquals(null, baseR))
+            {
+                Console.WriteLine("Error, null Base. Try setting the base first.");
+                return;
+            }
+            bestIPCR = baseR;
+            bestdCache = baseR;
+            baseR.DCachedifference = 0.0;
+            baseR.IPCdifference1 = 0.0;
+            for (int i = 0; i < listOfResults.Count; i++)
+            {
+                listOfResults[i].DCachedifference = (baseR.DCacheMissRate-listOfResults[i].DCacheMissRate)/baseR.DCacheMissRate;
+                if(listOfResults[i].DCachedifference > bestdCache.DCachedifference)
+                {
+                    bestdCache = listOfResults[i];
+                }
+                listOfResults[i].IPCdifference1 = (listOfResults[i].IPC1-baseR.IPC1) / baseR.IPC1;
+                if (listOfResults[i].IPCdifference1 > bestdCache.IPCdifference1)
+                {
+                    bestIPCR = listOfResults[i];
+                }
+            }
+
+        }
+        public void findHighestImpact()
+        {
+            //todo
+        }
+        public void print()
+        {
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(BenchMark() + ".txt"))
+            {
+                file.WriteLine("Group member: Edward Brunton");
+                file.WriteLine("Benchmark: " + BenchMark());
+                file.WriteLine("Base IPC: " + BaseIPC());
+                file.WriteLine("Best IPC: " + bestIPC());
+                file.WriteLine("IPC improvement(%): " + IPCImpovement());
+                file.WriteLine("Best IPC configuration: " + BestIPCConfig());
+                file.WriteLine("Base dCache miss rate: " + basedCacheMissRate());
+                file.WriteLine("Best dCache miss rate: " + bestdCacheMissRate());
+                file.WriteLine("dCache miss rate improvement(%): " + DCachImprovement());
+                file.WriteLine("Best dCache configuration: " + bestdCacheConfig());
+                file.WriteLine("Highest impact parameter: ");
+            }
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter("rawdata" + ".txt"))
+            {
+               for(int i = 0; i < listOfResults.Count; i++)
+                {
+                    file.WriteLine("Test Number " + listOfResults[i].TestNumber);
+                    file.WriteLine("DCache " + listOfResults[i].DCache);
+                    file.WriteLine("Associativity "  + listOfResults[i].SetAssociative);
+                    file.WriteLine("Line Size " + listOfResults[i].LineSize);
+                    file.WriteLine("Name " + listOfResults[i].Name);
+                    file.WriteLine("Associativity " + listOfResults[i].SetAssociative);
+                    file.WriteLine("IPC " + listOfResults[i].IPC1);
+                    file.WriteLine("IPC Improvement " + listOfResults[i].IPCdifference1);
+                    file.WriteLine("DCache Miss Rate " + listOfResults[i].DCacheMissRate);
+                    file.WriteLine("DCache Improvement" + listOfResults[i].DCachedifference);
+                    file.WriteLine("");
+                }
+            }
+        }
+    }
     class Program
     {
+        static double parseDouble(string something)
+        {
+            int startIndex = -1;
+            string useful = "";
+            string validNumbers = "1234567890-.";
+            for(int i = 0; i < validNumbers.Length-1; i++)
+            {
+                for(int j =0; j < something.Length; j++)
+                {
+                    if(validNumbers[i] == something[j])
+                    {
+                        if(j < startIndex | startIndex == -1)
+                        {
+                            startIndex = j;
+                            break;
+                        }
+                    }
+                }
+            }
+            if(startIndex == -1)
+            {
+                return -1.0;
+            }
+            else
+            {
+                int currentIndex = startIndex;
+                
+                    for(int i = 0; i < validNumbers.Length; i++)
+                    {
+                        if(validNumbers[i] == something[currentIndex])
+                        {
+                            useful += something[currentIndex];
+                            currentIndex++;
+                            i = -1;
+                        }
+                    }
+                
+            }
+            return Convert.ToDouble(useful);
+        }
         static void Main(string[] args)
         {
+            string[] fileList = new string[100];
+            List<List<string>> fileContents = FileImporter(ref fileList);
+            List<string> fileListFance = fileList.ToList();
+            fileListFance.RemoveAll(item => item == null);
+            ResultsComputer masterList = new ResultsComputer();
+            if(object.ReferenceEquals(null, fileListFance) || object.ReferenceEquals(null, fileContents))
+             {
+                Console.WriteLine("Error: lists not initialized; missing data!");
+            }
+            else if(fileListFance.Count != fileContents.Count)
+            {
+                Console.WriteLine("Error: missing at least one file");
+            }
+            for(int i = 0; i < fileListFance.Count; i++)
+            {
+                
+                Results results = masterList.ResultExists(fileListFance[i]);         
+                if (fileListFance[i].Contains("test") == true)
+                {
+                    bool missrate = false;
+                    bool ipc = false;
+                   
+                    for (int j = 0; j < fileContents[i].Count; j++)
+                    {
+                        if (fileContents[i][j].Contains("system.cpu.dcache.overall_miss_rate::total"))
+                        {   if(missrate)
+                            {
+                                Console.WriteLine("Error: double set the missrate");
+                            }
+                            else
+                            {
+                                missrate = true;
+                            }
+                            results.DCacheMissRate = parseDouble(fileContents[i][j]);// Convert.ToDouble(Regex.Replace(fileContents[i][j], "/^[0-9]+(\\.[0-9]+)?$", ""));
+                        }
+                        else if (fileContents[i][j].Contains("system.cpu.ip"))
+                        {
+                            if (ipc && (results.IPC1 != parseDouble(fileContents[i][j])))
+                            {
+                              
+                                Console.WriteLine("Error: double set the IPC");
+                                Console.WriteLine("Previous IPC: " + results.IPC1);
+                                Console.WriteLine("New IPC: " + parseDouble(fileContents[i][j]));
+                            }
+                            else
+                            {
+                                ipc = true;
+                            }
+                            results.IPC1 = parseDouble(fileContents[i][j]); //Convert.ToDouble(Regex.Replace(fileContents[i][j], "/^[0-9]+(\\.[0-9]+)?$", ""));
+                        }
+                       
+                    }
+                    if (missrate == false)
+                    {
+                        Console.WriteLine("Error: Could not find miss rate");
+                    }
+                    if (ipc == false)
+                    {
+                        Console.WriteLine("Error: Could not find ipc");
+                    }
+                }
+                else if (fileListFance[i].Contains("config") == true)
+                {
+                    bool lineSize = false;
+                    bool assoc = false;
+                    bool lookForDCacheSize = false;
+                    bool lookForICacheSize = false;
+                    for (int j = 0; j < fileContents[i].Count; j++)
+                    {
+                        if (fileContents[i][j].Contains("assoc"))
+                        {
+                            if (assoc)//only first associativity listed is desired
+                            {
+                                if (results.SetAssociative != int.Parse(Regex.Match(fileContents[i][j], @"\d+").Value, NumberFormatInfo.InvariantInfo))
+                                {
+                                   // Console.WriteLine("Blocking reseting of associativity");
+
+                                }
+                            }
+                            else
+                            {
+                                assoc = true;
+                                results.SetAssociative = int.Parse(Regex.Match(fileContents[i][j], @"\d+").Value, NumberFormatInfo.InvariantInfo);
+                            }
+                            
+                        }
+                        else if (fileContents[i][j].Contains("cache_line_size"))
+                        {
+                            if (lineSize)
+                            {
+                                Console.WriteLine("Error: double set the IPC");
+                            }
+                            else
+                            {
+                                lineSize = true;
+                            }
+                            results.LineSize = int.Parse(Regex.Match(fileContents[i][j], @"\d+").Value, NumberFormatInfo.InvariantInfo);
+                            //Convert.ToInt32(Regex.Replace(fileContents[i][j], "-?[0-9]+", ""));
+                        }
+                        else if(fileContents[i][j].Contains("a2time01"))
+                        {
+                            results.BenchMark = "a2time01";
+                        }
+                        else if (fileContents[i][j].Contains("[system.cpu.dcache]"))
+                        {
+                            lookForDCacheSize = true;
+                        }
+                        else if(lookForDCacheSize && fileContents[i][j].Contains("size"))
+                        {
+                            lookForDCacheSize = false;
+                            results.DCache = int.Parse(Regex.Match(fileContents[i][j], @"\d+").Value, NumberFormatInfo.InvariantInfo)/ 1024;
+                        }
+                        else if (fileContents[i][j].Contains("[system.cpu.icache]"))
+                        {
+                            lookForICacheSize = true;
+                        }
+                        else if (lookForICacheSize && fileContents[i][j].Contains("size"))
+                        {
+                            lookForICacheSize = false;
+                            results.ICache = int.Parse(Regex.Match(fileContents[i][j], @"\d+").Value, NumberFormatInfo.InvariantInfo) / 1024;
+                        }
+                    }
+                    if (lineSize == false)
+                    {
+                        Console.WriteLine("Error: Could not find line size");
+                    }
+                    if (assoc == false)
+                    {
+                        Console.WriteLine("Error: Could not find associtivity");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Warning: ");
+                    Console.WriteLine("File name: " + fileListFance[i] + " could not be understood.");
+                }
+            }
+            masterList.setBase();
+            masterList.findBest();
+            masterList.print();
+            //system.cpu.dcache.overall_miss_rate::total for data cache miss rates
+            //system.cpu.ip for IPC
+        }
+        private static List<List<string>> FileImporter(ref string[] fileList)
+        {
+            List<List<string>> fileData = new List<List<string>>();
+            string path = @"temp";
+            if (!Directory.Exists(path))  // if it doesn't exist, create
+            {
+                Console.WriteLine("Could not find the path.");
+                Directory.CreateDirectory(path);
+                using (System.IO.StreamWriter file = new System.IO.StreamWriter(path + "locationFile" + ".txt"))
+                {
+                    file.WriteLine("This is where you should put your files");
+                    return null;
+                }
+            }
+            else
+            {
+                fileList = Directory.GetFiles(path);
+            }
+            // Open the file to read from.
+            for (int i = 0; i < fileList.Length; i++)
+            {
+                List<string> row = new List<string>();
+                using (StreamReader sr = File.OpenText(fileList[i]))
+                {
+                    string s = "";
+                    while ((s = sr.ReadLine()) != null)
+                    {
+                        row.Add(s.Trim());
+                    }
+                }
+                fileData.Add(row);
+            }
+            return fileData;
         }
     }
 }
