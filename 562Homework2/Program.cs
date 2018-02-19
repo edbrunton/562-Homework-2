@@ -66,10 +66,13 @@ namespace _562Homework2
         }
         string BestIPCConfig()
         {
+            //   return bestIPCR.DCache + "-" + bestIPCR.SetAssociative + "-" + bestIPCR.LineSize + "-" + bestIPCR.ICache;
             return bestIPCR.DCache + "-" + bestIPCR.SetAssociative + "-" + bestIPCR.LineSize;
+
         }
         string bestdCacheConfig()
         {
+            //  return bestdCache.DCache + "-" + bestdCache.SetAssociative + "-" + bestdCache.LineSize + "-" + bestdCache.ICache;
             return bestdCache.DCache + "-" + bestdCache.SetAssociative + "-" + bestdCache.LineSize;
         }
         double basedCacheMissRate() => baseR.DCacheMissRate;
@@ -155,7 +158,12 @@ namespace _562Homework2
         }
         public void print()
         {
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter(BenchMark() + ".txt"))
+            string path = @"results";
+            if (!Directory.Exists(path))  // if it doesn't exist, create
+            {
+                Directory.CreateDirectory(path);
+            }
+                using (System.IO.StreamWriter file = new System.IO.StreamWriter(BenchMark() + ".txt"))
             {
                 file.WriteLine("Group member: Edward Brunton");
                 file.WriteLine("Benchmark: " + BenchMark());
@@ -169,8 +177,12 @@ namespace _562Homework2
                 file.WriteLine("Best dCache configuration: " + bestdCacheConfig());
                 file.WriteLine("Highest impact parameter: ");
             }
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter("rawdata" + ".txt"))
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(BenchMark() + "rawdata" + ".txt"))
             {
+                // file.WriteLine("Base info: " + baseR.DCache + "-" + baseR.SetAssociative + "-" + baseR.LineSize + "-" + baseR.ICache);
+                file.WriteLine("Base info: " + baseR.DCache + "-" + baseR.SetAssociative + "-" + baseR.LineSize);
+
+                file.WriteLine("");
                for(int i = 0; i < listOfResults.Count; i++)
                 {
                     file.WriteLine("Test Number " + listOfResults[i].TestNumber);
@@ -180,6 +192,7 @@ namespace _562Homework2
                     file.WriteLine("Name " + listOfResults[i].Name);
                     file.WriteLine("Associativity " + listOfResults[i].SetAssociative);
                     file.WriteLine("IPC " + listOfResults[i].IPC1);
+                    file.WriteLine("ICache Size" + listOfResults[i].ICache);
                     file.WriteLine("IPC Improvement " + listOfResults[i].IPCdifference1);
                     file.WriteLine("DCache Miss Rate " + listOfResults[i].DCacheMissRate);
                     file.WriteLine("DCache Improvement" + listOfResults[i].DCachedifference);
@@ -232,7 +245,7 @@ namespace _562Homework2
         }
         static void Main(string[] args)
         {
-            string[] fileList = new string[100];
+            string[] fileList = new string[300];
             List<List<string>> fileContents = FileImporter(ref fileList);
             List<string> fileListFance = fileList.ToList();
             fileListFance.RemoveAll(item => item == null);
@@ -334,6 +347,10 @@ namespace _562Homework2
                         else if(fileContents[i][j].Contains("a2time01"))
                         {
                             results.BenchMark = "a2time01";
+                        }
+                        else if (fileContents[i][j].Contains("mcf"))
+                        {
+                            results.BenchMark = "mcf";
                         }
                         else if (fileContents[i][j].Contains("[system.cpu.dcache]"))
                         {
