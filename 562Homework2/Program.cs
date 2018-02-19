@@ -11,7 +11,27 @@ using System.Threading.Tasks;
 
 namespace _562Homework2
 {
-    class Results
+    public class BoolValues
+    {
+        Results resultsPart;
+        bool cacheTested;
+        bool setTested;
+        bool lineTested;
+
+        public BoolValues(Results resultsPart)
+        {
+            this.ResultsPart = resultsPart;
+            CacheTested = false;
+            SetTested = false;
+            LineTested = false;
+        }
+
+        public bool CacheTested { get => cacheTested; set => cacheTested = value; }
+        public bool SetTested { get => setTested; set => setTested = value; }
+        public bool LineTested { get => lineTested; set => lineTested = value; }
+        public Results ResultsPart { get => resultsPart; set => resultsPart = value; }
+    }
+    public class Results
     {
         private int testNumber;
         string benchMark;
@@ -51,7 +71,7 @@ namespace _562Homework2
 
         double BaseIPC()
         {
-            if(object.ReferenceEquals(null, baseR))
+            if (object.ReferenceEquals(null, baseR))
             {
                 Console.WriteLine("Error, base does not exist when attempting to access baseIPC");
                 return -1.0;
@@ -86,16 +106,16 @@ namespace _562Homework2
         }
         public Results ResultExists(string fileName)
         {
-            if(object.ReferenceEquals(null, fileName))
+            if (object.ReferenceEquals(null, fileName))
             {
                 Console.WriteLine("Error, gave null string for file name");
                 return null;
             }
             int testNumber = int.Parse(Regex.Match(fileName, @"\d+").Value, NumberFormatInfo.InvariantInfo);
             //Convert.ToInt32(Regex.Replace(fileName, "-?[0-9]+", ""));
-            for (int i =0; i < listOfResults.Count; i++)
+            for (int i = 0; i < listOfResults.Count; i++)
             {
-                if(listOfResults[i].TestNumber == testNumber)
+                if (listOfResults[i].TestNumber == testNumber)
                 {
                     return listOfResults[i];
                 }
@@ -111,18 +131,18 @@ namespace _562Homework2
             int dCache = 32;
             int assoc = 4;
             int linesize = 64;
-            for(int i = 0; i < listOfResults.Count; i++)
+            for (int i = 0; i < listOfResults.Count; i++)
             {
-                if(listOfResults[i].DCache == dCache && listOfResults[i].SetAssociative == assoc
+                if (listOfResults[i].DCache == dCache && listOfResults[i].SetAssociative == assoc
                     && listOfResults[i].LineSize == linesize && listOfResults[i].ICache == iCache)
                 {
 
                     this.baseR = listOfResults[i];
-                   
+
                     break;
                 }
             }
-            if(this.baseR == null)
+            if (this.baseR == null)
             {
                 Console.WriteLine("Error: could not find basline");
                 return null;
@@ -142,12 +162,12 @@ namespace _562Homework2
             baseR.IPCdifference1 = 0.0;
             for (int i = 0; i < listOfResults.Count; i++)
             {
-                listOfResults[i].DCachedifference = (baseR.DCacheMissRate-listOfResults[i].DCacheMissRate)/baseR.DCacheMissRate;
-                if(listOfResults[i].DCachedifference > bestdCache.DCachedifference)
+                listOfResults[i].DCachedifference = (baseR.DCacheMissRate - listOfResults[i].DCacheMissRate) / baseR.DCacheMissRate;
+                if (listOfResults[i].DCachedifference > bestdCache.DCachedifference)
                 {
                     bestdCache = listOfResults[i];
                 }
-                listOfResults[i].IPCdifference1 = (listOfResults[i].IPC1-baseR.IPC1) / baseR.IPC1;
+                listOfResults[i].IPCdifference1 = (listOfResults[i].IPC1 - baseR.IPC1) / baseR.IPC1;
                 if (listOfResults[i].IPCdifference1 > bestdCache.IPCdifference1)
                 {
                     bestIPCR = listOfResults[i];
@@ -155,19 +175,104 @@ namespace _562Homework2
             }
 
         }
-        struct ComparisonValues
-        {
-
-        }
+        
         public string findHighestImpact()
         {
-            List<int> cacheSizes = new List<int>();
-            List<int> setAssociative = new List<int>();
-            List<int> lineSizes = new List<int>();
+            List<int> cacheSizes, setAssociative, lineSizes;
+            findSizes(out cacheSizes, out setAssociative, out lineSizes);
             List<List<Results>> cacheSorted = new List<List<Results>>();
             List<List<Results>> setSorted = new List<List<Results>>();
             List<List<Results>> lineSorted = new List<List<Results>>();
-            
+
+
+            for (int i = 0; i < cacheSizes.Count; i++)
+            {
+                int k = cacheSizes[i];
+                cacheSorted.Add(getAllofCacheSize(k));
+            }
+            for (int i = 0; i < setAssociative.Count; i++)
+            {
+                int k = setAssociative[i];
+                setSorted.Add(getsetAssociative(k));
+            }
+            for (int i = 0; i < cacheSizes.Count; i++)
+            {
+                int k = lineSizes[i];
+                lineSorted.Add(getlineSizes(k));
+            }
+
+            double sumCache = calculateDifferences(cacheSorted);
+            double sumSet = calculateDifferences(setSorted);
+            double sumLine = calculateDifferences(lineSorted);
+            /*       for (int i = 0; i < setSorted.Count; i++)
+                    {
+                        for (int j = 0; j < setSorted[i].Count; j++)
+                        {
+                            if (setSorted[i][j].DCachedifference > 0)
+                            {
+                                sumSet += setSorted[i][j].DCachedifference;
+                            }
+                            else
+                            {
+                                sumSet -= setSorted[i][j].DCachedifference;
+                            }
+                            if (setSorted[i][j].IPCdifference1 > 0)
+                            {
+                                sumSet += setSorted[i][j].IPCdifference1;
+                            }
+                            else
+                            {
+                                sumSet -= setSorted[i][j].IPCdifference1;
+                            }
+                        }
+                    }
+                    for (int i = 0; i < setSorted.Count; i++)
+                    {
+                        for (int j = 0; j < lineSorted[i].Count; j++)
+                        {
+                            if (lineSorted[i][j].DCachedifference > 0)
+                            {
+                                sumLine += lineSorted[i][j].DCachedifference;
+                            }
+                            else
+                            {
+                                sumLine -= lineSorted[i][j].DCachedifference;
+                            }
+                            if (lineSorted[i][j].IPCdifference1 > 0)
+                            {
+                                sumLine += lineSorted[i][j].IPCdifference1;
+                            }
+                            else
+                            {
+                                sumLine -= lineSorted[i][j].IPCdifference1;
+                            }
+                        }
+                    }
+                    */
+            Console.WriteLine(sumLine);
+            Console.WriteLine(sumCache);
+            Console.WriteLine(sumSet);
+
+            if (sumLine < sumCache && sumLine < sumSet)
+            {
+                highestImpact = "Line Size";
+            }
+            else if (sumCache < sumLine && sumCache < sumSet)
+            {
+                highestImpact = "Cache Size";
+            }
+            else
+            {
+                highestImpact = "Set Associativity";
+            }
+            return highestImpact;
+        }
+       
+        private void findSizes(out List<int> cacheSizes, out List<int> setAssociative, out List<int> lineSizes)
+        {
+            cacheSizes = new List<int>();
+            setAssociative = new List<int>();
+            lineSizes = new List<int>();
             for (int i = 0; i < this.listOfResults.Count; i++)
             {
                 bool cacheSizeAlreadyExists = false;
@@ -212,87 +317,178 @@ namespace _562Homework2
                     lineSizes.Add(listOfResults[i].LineSize);
                 }
             }
-            for (int i = 0; i < cacheSizes.Count; i++)
-            {
-                int k = cacheSizes[i];
-                cacheSorted.Add(getAllofCacheSize(k));
-            }
-            for (int i = 0; i < setAssociative.Count; i++)
-            {
-                int k = setAssociative[i];
-                setSorted.Add(getsetAssociative(k));
-            }
-            for (int i = 0; i < cacheSizes.Count; i++)
-            {
-                int k = lineSizes[i];
-                lineSorted.Add(getlineSizes(k));
-            }
-           
-            double sumCache = calculateDifferences(cacheSorted);
-            double sumSet = calculateDifferences(setSorted);
-            double sumLine = calculateDifferences(lineSorted);
-    /*       for (int i = 0; i < setSorted.Count; i++)
-            {
-                for (int j = 0; j < setSorted[i].Count; j++)
-                {
-                    if (setSorted[i][j].DCachedifference > 0)
-                    {
-                        sumSet += setSorted[i][j].DCachedifference;
-                    }
-                    else
-                    {
-                        sumSet -= setSorted[i][j].DCachedifference;
-                    }
-                    if (setSorted[i][j].IPCdifference1 > 0)
-                    {
-                        sumSet += setSorted[i][j].IPCdifference1;
-                    }
-                    else
-                    {
-                        sumSet -= setSorted[i][j].IPCdifference1;
-                    }
-                }
-            }
-            for (int i = 0; i < setSorted.Count; i++)
-            {
-                for (int j = 0; j < lineSorted[i].Count; j++)
-                {
-                    if (lineSorted[i][j].DCachedifference > 0)
-                    {
-                        sumLine += lineSorted[i][j].DCachedifference;
-                    }
-                    else
-                    {
-                        sumLine -= lineSorted[i][j].DCachedifference;
-                    }
-                    if (lineSorted[i][j].IPCdifference1 > 0)
-                    {
-                        sumLine += lineSorted[i][j].IPCdifference1;
-                    }
-                    else
-                    {
-                        sumLine -= lineSorted[i][j].IPCdifference1;
-                    }
-                }
-            }
-            */
-            Console.WriteLine(sumLine);
-            Console.WriteLine(sumCache);
-            Console.WriteLine(sumSet);
+        }
+        public string findHighestImpactBest()
+        {
+            List <BoolValues> usableStructure = new List<BoolValues>();
+            List<double> lineSizeSTDs = new List<double>();
+            List<double> cacheSizeSTDs = new List<double>();
+            List<double> setSizeSTDs = new List<double>();
 
-            if (sumLine < sumCache && sumLine < sumSet)
+            for (int i = 0; i <this.listOfResults.Count; i++)
             {
-                highestImpact = "Line Size";
+                usableStructure.Add(new BoolValues(listOfResults[i]));
             }
-            else if (sumCache < sumLine && sumCache < sumSet)
+            for(int i =0; i < usableStructure.Count; i++)
             {
-                highestImpact = "Cache Size";
+                List<double> stdDiv = new List<double>();
+                List<double> stdDiv2 = new List<double>();
+                if (!usableStructure[i].CacheTested)
+                {
+                    stdDiv.Clear();
+                    stdDiv2.Clear();
+                    for(int j = 0; j < usableStructure.Count; j ++)
+                    {
+                        if(j==i)
+                        {
+                            continue;
+                        }
+                        if(usableStructure[i].ResultsPart.LineSize == usableStructure[j].ResultsPart.LineSize && usableStructure[i].ResultsPart.SetAssociative == usableStructure[j].ResultsPart.SetAssociative)
+                        {
+                            stdDiv.Add(usableStructure[j].ResultsPart.DCachedifference);
+                            stdDiv2.Add(usableStructure[j].ResultsPart.IPCdifference1);
+                        }
+                    }
+                    if(stdDiv.Count >0)
+                    {
+                        stdDiv.Add(usableStructure[i].ResultsPart.DCachedifference);
+                        stdDiv2.Add(usableStructure[i].ResultsPart.IPCdifference1);
+                        cacheSizeSTDs.Add(CalculateStdDev(stdDiv));
+                        cacheSizeSTDs.Add(CalculateStdDev(stdDiv2));
+                    }
+                }
+                if(!usableStructure[i].LineTested)
+                {
+                    stdDiv.Clear();
+                    stdDiv2.Clear();
+                    for (int j = 0; j < usableStructure.Count; j++)
+                    {
+                        if (j == i)
+                        {
+                            continue;
+                        }
+                        if (usableStructure[i].ResultsPart.DCache == usableStructure[j].ResultsPart.DCache && usableStructure[i].ResultsPart.SetAssociative == usableStructure[j].ResultsPart.SetAssociative)
+                        {
+                            stdDiv.Add(usableStructure[j].ResultsPart.DCachedifference);
+                            stdDiv2.Add(usableStructure[j].ResultsPart.IPCdifference1);
+                        }
+                    }
+                    if (stdDiv.Count > 0)
+                    {
+                        stdDiv.Add(usableStructure[i].ResultsPart.DCachedifference);
+                        stdDiv2.Add(usableStructure[i].ResultsPart.IPCdifference1);
+                        setSizeSTDs.Add(CalculateStdDev(stdDiv));
+                        setSizeSTDs.Add(CalculateStdDev(stdDiv2));
+                    }
+                }
+                if(!usableStructure[i].SetTested)
+                {
+                    stdDiv.Clear();
+                    stdDiv2.Clear();
+                    for (int j = 0; j < usableStructure.Count; j++)
+                    {
+                        if (j == i)
+                        {
+                            continue;
+                        }
+                        if (usableStructure[i].ResultsPart.DCache == usableStructure[j].ResultsPart.DCache && usableStructure[i].ResultsPart.LineSize == usableStructure[j].ResultsPart.LineSize)
+                        {
+                            stdDiv.Add(usableStructure[j].ResultsPart.DCachedifference);
+                            stdDiv2.Add(usableStructure[j].ResultsPart.IPCdifference1);
+                        }
+                    }
+                    if (stdDiv.Count > 0)
+                    {
+                        stdDiv.Add(usableStructure[i].ResultsPart.DCachedifference);
+                        stdDiv2.Add(usableStructure[i].ResultsPart.IPCdifference1);
+                        lineSizeSTDs.Add(CalculateStdDev(stdDiv));
+                        lineSizeSTDs.Add(CalculateStdDev(stdDiv2));
+                    }
+                }
+            }
+            double lineAverage = lineSizeSTDs.Average();
+            double cacheAverage = cacheSizeSTDs.Average();
+            double setAverage = setSizeSTDs.Average();
+            Console.WriteLine(lineAverage);
+            Console.WriteLine(cacheAverage);
+            Console.WriteLine(setAverage);
+            if(cacheAverage > setAverage && cacheAverage > lineAverage)
+            {
+                return "Cache Size";
+            }
+            else if(setAverage > lineAverage)
+            {
+                return "Set Associativity";
             }
             else
             {
-                highestImpact = "Set Associativity";
+                return "Line Size";
+
             }
-            return highestImpact;
+        }
+        public string findHighestImpactBetter()
+        {
+            List<int> cacheSizes, setAssociative, lineSizes;
+            findSizes(out cacheSizes, out setAssociative, out lineSizes);
+            double[,,] dCacheVals = new double[cacheSizes.Count, setAssociative.Count, lineSizes.Count];
+            double[,,] IPCVals = new double[cacheSizes.Count, setAssociative.Count, lineSizes.Count];
+            double[,] cacheDiffs = new double[setAssociative.Count, lineSizes.Count];
+            double[,] setDiffs = new double[cacheSizes.Count, lineSizes.Count];
+            double[,] lineDiffs = new double[cacheSizes.Count, setAssociative.Count];
+
+            for (int i =0; i <dCacheVals.GetLength(0); i++)
+            {
+                for (int j = 0; j < dCacheVals.GetLength(1); j++)
+                {
+                    for(int k =0; k< dCacheVals.GetLength(2); k++)
+                    {
+                        dCacheVals[i, j, k] = -1;
+                        IPCVals[i, j, k] = -1;
+                    }
+                }
+            }
+            for (int i = 0; i < this.listOfResults.Count; i++)
+            {
+                dCacheVals[cacheSizes.IndexOf(listOfResults[i].DCache), setAssociative.IndexOf(listOfResults[i].SetAssociative), lineSizes.IndexOf(listOfResults[i].LineSize)] = listOfResults[i].DCachedifference;
+                IPCVals[cacheSizes.IndexOf(listOfResults[i].DCache), setAssociative.IndexOf(listOfResults[i].SetAssociative), lineSizes.IndexOf(listOfResults[i].LineSize)] = listOfResults[i].DCachedifference;
+            }
+         /*   List<double> listStuff1 = new List<double>();
+            List<double> listStuff2 = new List<double>();
+            double sumDiff = 0.0;
+            for (int i = 0; i < dCacheVals.GetLength(0); i++)
+            {
+                for (int j = 0; j < dCacheVals.GetLength(1); j++)
+                {
+                    for (int k = 0; k < dCacheVals.GetLength(2); k++)
+                    {
+                            if (dCacheVals[i, j, k] != -1 && IPCVals[i, j, k] != -1)
+                            {
+                                listStuff1.Add(dCacheVals[i, j, k]);
+                                listStuff2.Add(IPCVals[i, j, k]);
+                            }
+                    }
+                    sumDiff += CalculateStdDev(listStuff1);
+                    sumDiff += CalculateStdDev(listStuff2);
+                    listStuff1.Clear();
+                    listStuff2.Clear();
+                }
+            }
+            Console.WriteLine(sumDiff);*/
+            return "";
+        }
+        private double CalculateStdDev(List<double> values)
+        {   
+          double ret = 0;
+          if (values.Count() > 0) 
+          {      
+             //Compute the Average      
+             double avg = values.Average();
+             //Perform the Sum of (value-avg)_2_2      
+             double sum = values.Sum(d => Math.Pow(d - avg, 2));
+             //Put it all together      
+             ret = Math.Sqrt((sum) / (values.Count()-1));   
+          }   
+          return ret;
         }
 
         private static double calculateDifferences(List<List<Results>> cacheSorted)
@@ -398,7 +594,7 @@ namespace _562Homework2
                 file.WriteLine("Best dCache miss rate: " + bestdCacheMissRate());
                 file.WriteLine("dCache miss rate improvement(%): " + DCachImprovement());
                 file.WriteLine("Best dCache configuration: " + bestdCacheConfig());
-                file.WriteLine("Highest impact parameter: " + findHighestImpact());
+                file.WriteLine("Highest impact parameter: " + findHighestImpactBest());//findHighestImpact());
             }
             using (System.IO.StreamWriter file = new System.IO.StreamWriter(BenchMark() + "rawdata" + ".txt"))
             {
@@ -411,6 +607,28 @@ namespace _562Homework2
                     file.WriteLine("Test Number " + listOfResults[i].TestNumber);
                     file.WriteLine("DCache " + listOfResults[i].DCache);
                     file.WriteLine("Associativity "  + listOfResults[i].SetAssociative);
+                    file.WriteLine("Line Size " + listOfResults[i].LineSize);
+                    file.WriteLine("Name " + listOfResults[i].Name);
+                    file.WriteLine("Associativity " + listOfResults[i].SetAssociative);
+                    file.WriteLine("IPC " + listOfResults[i].IPC1);
+                    file.WriteLine("ICache Size" + listOfResults[i].ICache);
+                    file.WriteLine("IPC Improvement " + listOfResults[i].IPCdifference1);
+                    file.WriteLine("DCache Miss Rate " + listOfResults[i].DCacheMissRate);
+                    file.WriteLine("DCache Improvement" + listOfResults[i].DCachedifference);
+                    file.WriteLine("");
+                }
+            }
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(BenchMark() + "rawdata" + ".cvs"))
+            {
+                // file.WriteLine("Base info: " + baseR.DCache + "-" + baseR.SetAssociative + "-" + baseR.LineSize + "-" + baseR.ICache);
+                file.WriteLine("Base info: " + baseR.DCache + "-" + baseR.SetAssociative + "-" + baseR.LineSize);
+
+                file.WriteLine("");
+                for (int i = 0; i < listOfResults.Count; i++)
+                {
+                    file.WriteLine("Test Number " + listOfResults[i].TestNumber);
+                    file.WriteLine("DCache " + listOfResults[i].DCache);
+                    file.WriteLine("Associativity " + listOfResults[i].SetAssociative);
                     file.WriteLine("Line Size " + listOfResults[i].LineSize);
                     file.WriteLine("Name " + listOfResults[i].Name);
                     file.WriteLine("Associativity " + listOfResults[i].SetAssociative);
