@@ -352,6 +352,22 @@ namespace _562Homework2
                         {
                             results.BenchMark = "mcf";
                         }
+                        else if (fileContents[i][j].Contains("cacheb01"))
+                        {
+                            results.BenchMark = "cacheb01";
+                        }
+                        else if (fileContents[i][j].Contains("bitmnp01"))
+                        {
+                            results.BenchMark = "bitmnp01";
+                        }
+                        else if (fileContents[i][j].Contains("bzip2"))
+                        {
+                            results.BenchMark = "bzip2";
+                        }
+                        else if (fileContents[i][j].Contains("libquantum"))
+                        {
+                            results.BenchMark = "libquantum";
+                        }
                         else if (fileContents[i][j].Contains("[system.cpu.dcache]"))
                         {
                             lookForDCacheSize = true;
