@@ -343,14 +343,18 @@ namespace _562Homework2
                         {
                             continue;
                         }
-                        if(usableStructure[i].ResultsPart.LineSize == usableStructure[j].ResultsPart.LineSize && usableStructure[i].ResultsPart.SetAssociative == usableStructure[j].ResultsPart.SetAssociative)
+                        if(usableStructure[i].ResultsPart.LineSize == usableStructure[j].ResultsPart.LineSize &&
+                            usableStructure[i].ResultsPart.SetAssociative == usableStructure[j].ResultsPart.SetAssociative &&
+                            !usableStructure[j].CacheTested)
                         {
+                            usableStructure[j].CacheTested = true;
                             stdDiv.Add(usableStructure[j].ResultsPart.DCachedifference);
                             stdDiv2.Add(usableStructure[j].ResultsPart.IPCdifference1);
                         }
                     }
                     if(stdDiv.Count >0)
                     {
+                        usableStructure[i].CacheTested = true;
                         stdDiv.Add(usableStructure[i].ResultsPart.DCachedifference);
                         stdDiv2.Add(usableStructure[i].ResultsPart.IPCdifference1);
                         cacheSizeSTDs.Add(CalculateStdDev(stdDiv));
@@ -367,14 +371,18 @@ namespace _562Homework2
                         {
                             continue;
                         }
-                        if (usableStructure[i].ResultsPart.DCache == usableStructure[j].ResultsPart.DCache && usableStructure[i].ResultsPart.SetAssociative == usableStructure[j].ResultsPart.SetAssociative)
+                        if (usableStructure[i].ResultsPart.DCache == usableStructure[j].ResultsPart.DCache && 
+                            usableStructure[i].ResultsPart.SetAssociative == usableStructure[j].ResultsPart.SetAssociative &&
+                            !usableStructure[j].LineTested)
                         {
+                            usableStructure[j].LineTested = true;
                             stdDiv.Add(usableStructure[j].ResultsPart.DCachedifference);
                             stdDiv2.Add(usableStructure[j].ResultsPart.IPCdifference1);
                         }
                     }
                     if (stdDiv.Count > 0)
                     {
+                        usableStructure[i].LineTested = true;
                         stdDiv.Add(usableStructure[i].ResultsPart.DCachedifference);
                         stdDiv2.Add(usableStructure[i].ResultsPart.IPCdifference1);
                         setSizeSTDs.Add(CalculateStdDev(stdDiv));
@@ -391,14 +399,18 @@ namespace _562Homework2
                         {
                             continue;
                         }
-                        if (usableStructure[i].ResultsPart.DCache == usableStructure[j].ResultsPart.DCache && usableStructure[i].ResultsPart.LineSize == usableStructure[j].ResultsPart.LineSize)
+                        if (usableStructure[i].ResultsPart.DCache == usableStructure[j].ResultsPart.DCache &&
+                            usableStructure[i].ResultsPart.LineSize == usableStructure[j].ResultsPart.LineSize &&
+                            !usableStructure[j].SetTested)
                         {
+                            usableStructure[j].SetTested = true;
                             stdDiv.Add(usableStructure[j].ResultsPart.DCachedifference);
                             stdDiv2.Add(usableStructure[j].ResultsPart.IPCdifference1);
                         }
                     }
                     if (stdDiv.Count > 0)
                     {
+                        usableStructure[i].SetTested = true;
                         stdDiv.Add(usableStructure[i].ResultsPart.DCachedifference);
                         stdDiv2.Add(usableStructure[i].ResultsPart.IPCdifference1);
                         lineSizeSTDs.Add(CalculateStdDev(stdDiv));
@@ -618,7 +630,7 @@ namespace _562Homework2
                     file.WriteLine("");
                 }
             }
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter(BenchMark() + "rawdata" + ".cvs"))
+        /*    using (System.IO.StreamWriter file = new System.IO.StreamWriter(BenchMark() + "rawdata" + ".cvs"))
             {
                 // file.WriteLine("Base info: " + baseR.DCache + "-" + baseR.SetAssociative + "-" + baseR.LineSize + "-" + baseR.ICache);
                 file.WriteLine("Base info: " + baseR.DCache + "-" + baseR.SetAssociative + "-" + baseR.LineSize);
@@ -639,7 +651,7 @@ namespace _562Homework2
                     file.WriteLine("DCache Improvement" + listOfResults[i].DCachedifference);
                     file.WriteLine("");
                 }
-            }
+            }*/
         }
     }
     class Program
