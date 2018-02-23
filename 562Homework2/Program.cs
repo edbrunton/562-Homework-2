@@ -401,7 +401,7 @@ namespace _562Homework2
         }
         static void Main(string[] args)
         {
-            string[] fileList = new string[300];
+            string[] fileList = new string[300];//max number of files that can be handled. Should have been a list, but whatever
             List<List<string>> fileContents = FileImporter(ref fileList);
             List<string> fileListFance = fileList.ToList();
             fileListFance.RemoveAll(item => item == null);
@@ -521,7 +521,7 @@ namespace _562Homework2
                         else if (fileContents[i][j].Contains("libquantum"))
                         {
                             results.BenchMark = "libquantum";
-                        }
+                        }//add an additional benchmarks here. In future, make general function
                         else if (fileContents[i][j].Contains("[system.cpu.dcache]"))
                         {
                             lookForDCacheSize = true;
