@@ -128,7 +128,7 @@ namespace _562Homework2
         //this function sets the case for the base case (could be replaced in future by file read
         public Results SetBase()
         {
-            
+
             int iCache = 32;//modify if different instruction cache base case
             int dCache = 32;//modify if different data cache base case
             int assoc = 4;//modify if different associativity base case
@@ -180,16 +180,16 @@ namespace _562Homework2
         //takes standard distribution of each different set of test and averages to find overal highest impact
         public string FindHighestImpactBest()
         {
-            List <BoolValues> usableStructure = new List<BoolValues>();
+            List<BoolValues> usableStructure = new List<BoolValues>();
             List<double> lineSizeSTDs = new List<double>();
             List<double> cacheSizeSTDs = new List<double>();
             List<double> setSizeSTDs = new List<double>();
 
-            for (int i = 0; i <this.listOfResults.Count; i++)
+            for (int i = 0; i < this.listOfResults.Count; i++)
             {
                 usableStructure.Add(new BoolValues(listOfResults[i]));
             }
-            for(int i =0; i < usableStructure.Count; i++)
+            for (int i = 0; i < usableStructure.Count; i++)
             {
                 List<double> stdDivDcache = new List<double>();
                 List<double> stdDivIPC = new List<double>();
@@ -197,13 +197,13 @@ namespace _562Homework2
                 {
                     stdDivDcache.Clear();
                     stdDivIPC.Clear();
-                    for(int j = 0; j < usableStructure.Count; j ++)
+                    for (int j = 0; j < usableStructure.Count; j++)
                     {
-                        if(j==i)
+                        if (j == i)
                         {
                             continue;
                         }
-                        if(usableStructure[i].ResultsPart.LineSize == usableStructure[j].ResultsPart.LineSize &&
+                        if (usableStructure[i].ResultsPart.LineSize == usableStructure[j].ResultsPart.LineSize &&
                             usableStructure[i].ResultsPart.SetAssociative == usableStructure[j].ResultsPart.SetAssociative &&
                             !usableStructure[j].CacheTested)
                         {
@@ -212,7 +212,7 @@ namespace _562Homework2
                             stdDivIPC.Add(usableStructure[j].ResultsPart.IPCdifference1);
                         }
                     }
-                    if(stdDivDcache.Count >0)
+                    if (stdDivDcache.Count > 0)
                     {
                         usableStructure[i].CacheTested = true;
                         stdDivDcache.Add(usableStructure[i].ResultsPart.DCachedifference);
@@ -221,7 +221,7 @@ namespace _562Homework2
                         cacheSizeSTDs.Add(CalculateStdDev(stdDivIPC));
                     }
                 }
-                if(!usableStructure[i].LineTested)
+                if (!usableStructure[i].LineTested)
                 {
                     stdDivDcache.Clear();
                     stdDivIPC.Clear();
@@ -231,7 +231,7 @@ namespace _562Homework2
                         {
                             continue;//do not compare agaisnt self
                         }
-                        if (usableStructure[i].ResultsPart.DCache == usableStructure[j].ResultsPart.DCache && 
+                        if (usableStructure[i].ResultsPart.DCache == usableStructure[j].ResultsPart.DCache &&
                             usableStructure[i].ResultsPart.SetAssociative == usableStructure[j].ResultsPart.SetAssociative &&
                             !usableStructure[j].LineTested)
                         {
@@ -249,7 +249,7 @@ namespace _562Homework2
                         setSizeSTDs.Add(CalculateStdDev(stdDivIPC));
                     }
                 }
-                if(!usableStructure[i].SetTested)
+                if (!usableStructure[i].SetTested)
                 {
                     stdDivDcache.Clear();
                     stdDivIPC.Clear();
@@ -284,11 +284,11 @@ namespace _562Homework2
             Console.WriteLine(lineAverage);
             Console.WriteLine(cacheAverage);
             Console.WriteLine(setAverage);
-            if(cacheAverage > setAverage && cacheAverage > lineAverage)
+            if (cacheAverage > setAverage && cacheAverage > lineAverage)
             {
                 return "Cache Size";
             }
-            else if(setAverage > lineAverage)
+            else if (setAverage > lineAverage)
             {
                 return "Set Associativity";
             }
@@ -299,18 +299,18 @@ namespace _562Homework2
             }
         }
         private double CalculateStdDev(List<double> values)
-        {   
-          double ret = 0;
-          if (values.Count() > 0) 
-          {      
-             //Compute the Average      
-             double avg = values.Average();
-             //Perform the Sum of (value-avg)_2_2      
-             double sum = values.Sum(d => Math.Pow(d - avg, 2));
-             //Put it all together      
-             ret = Math.Sqrt((sum) / (values.Count()-1));   
-          }   
-          return ret;
+        {
+            double ret = 0;
+            if (values.Count() > 0)
+            {
+                //Compute the Average      
+                double avg = values.Average();
+                //Perform the Sum of (value-avg)_2_2      
+                double sum = values.Sum(d => Math.Pow(d - avg, 2));
+                //Put it all together      
+                ret = Math.Sqrt((sum) / (values.Count() - 1));
+            }
+            return ret;
         }
         public void Print()
         {
@@ -319,7 +319,7 @@ namespace _562Homework2
             {
                 Directory.CreateDirectory(path);
             }
-                using (System.IO.StreamWriter file = new System.IO.StreamWriter(BenchMark() + ".txt"))
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(BenchMark() + ".txt"))
             {
                 file.WriteLine("Group member: Edward Brunton");
                 file.WriteLine("Benchmark: " + BenchMark());
@@ -339,11 +339,11 @@ namespace _562Homework2
                 file.WriteLine("Base info: " + baseR.DCache + "-" + baseR.SetAssociative + "-" + baseR.LineSize);
 
                 file.WriteLine("");
-               for(int i = 0; i < listOfResults.Count; i++)
+                for (int i = 0; i < listOfResults.Count; i++)
                 {
                     file.WriteLine("Test Number " + listOfResults[i].TestNumber);
                     file.WriteLine("DCache " + listOfResults[i].DCache);
-                    file.WriteLine("Associativity "  + listOfResults[i].SetAssociative);
+                    file.WriteLine("Associativity " + listOfResults[i].SetAssociative);
                     file.WriteLine("Line Size " + listOfResults[i].LineSize);
                     file.WriteLine("Name " + listOfResults[i].Name);
                     file.WriteLine("Associativity " + listOfResults[i].SetAssociative);
@@ -364,13 +364,13 @@ namespace _562Homework2
             int startIndex = -1;
             string useful = "";
             string validNumbers = "1234567890-.";
-            for(int i = 0; i < validNumbers.Length-1; i++)
+            for (int i = 0; i < validNumbers.Length - 1; i++)
             {
-                for(int j =0; j < something.Length; j++)
+                for (int j = 0; j < something.Length; j++)
                 {
-                    if(validNumbers[i] == something[j])
+                    if (validNumbers[i] == something[j])
                     {
-                        if(j < startIndex | startIndex == -1)
+                        if (j < startIndex | startIndex == -1)
                         {
                             startIndex = j;
                             break;
@@ -378,24 +378,24 @@ namespace _562Homework2
                     }
                 }
             }
-            if(startIndex == -1)
+            if (startIndex == -1)
             {
                 return -1.0;
             }
             else
             {
                 int currentIndex = startIndex;
-                
-                    for(int i = 0; i < validNumbers.Length; i++)
+
+                for (int i = 0; i < validNumbers.Length; i++)
+                {
+                    if (validNumbers[i] == something[currentIndex])
                     {
-                        if(validNumbers[i] == something[currentIndex])
-                        {
-                            useful += something[currentIndex];
-                            currentIndex++;
-                            i = -1;
-                        }
+                        useful += something[currentIndex];
+                        currentIndex++;
+                        i = -1;
                     }
-                
+                }
+
             }
             return Convert.ToDouble(useful);
         }
@@ -406,27 +406,28 @@ namespace _562Homework2
             List<string> fileListFance = fileList.ToList();
             fileListFance.RemoveAll(item => item == null);
             ResultsComputer masterList = new ResultsComputer();
-            if(fileListFance is null || fileContents is null)
-             {
+            if (fileListFance is null || fileContents is null)
+            {
                 Console.WriteLine("Error: lists not initialized; missing data!");
             }
-            else if(fileListFance.Count != fileContents.Count)
+            else if (fileListFance.Count != fileContents.Count)
             {
                 Console.WriteLine("Error: missing at least one file");
             }
-            for(int i = 0; i < fileListFance.Count; i++)
+            for (int i = 0; i < fileListFance.Count; i++)
             {
-                
-                Results results = masterList.ResultExists(fileListFance[i]);         
+
+                Results results = masterList.ResultExists(fileListFance[i]);
                 if (fileListFance[i].Contains("test") == true)
                 {
                     bool missrate = false;
                     bool ipc = false;
-                   
+
                     for (int j = 0; j < fileContents[i].Count; j++)
                     {
                         if (fileContents[i][j].Contains("system.cpu.dcache.overall_miss_rate::total"))
-                        {   if(missrate)
+                        {
+                            if (missrate)
                             {
                                 Console.WriteLine("Error: double set the missrate");
                             }
@@ -440,7 +441,7 @@ namespace _562Homework2
                         {
                             if (ipc && (results.IPC1 != ParseDouble(fileContents[i][j])))
                             {
-                              
+
                                 Console.WriteLine("Error: double set the IPC");
                                 Console.WriteLine("Previous IPC: " + results.IPC1);
                                 Console.WriteLine("New IPC: " + ParseDouble(fileContents[i][j]));
@@ -449,9 +450,9 @@ namespace _562Homework2
                             {
                                 ipc = true;
                             }
-                            results.IPC1 = ParseDouble(fileContents[i][j]); 
+                            results.IPC1 = ParseDouble(fileContents[i][j]);
                         }
-                       
+
                     }
                     if (missrate == false)
                     {
@@ -476,7 +477,7 @@ namespace _562Homework2
                             {
                                 if (results.SetAssociative != int.Parse(Regex.Match(fileContents[i][j], @"\d+").Value, NumberFormatInfo.InvariantInfo))
                                 {
-                                   // Console.WriteLine("Blocking reseting of associativity");
+                                    // Console.WriteLine("Blocking reseting of associativity");
                                 }
                             }
                             else
@@ -484,7 +485,7 @@ namespace _562Homework2
                                 assoc = true;
                                 results.SetAssociative = int.Parse(Regex.Match(fileContents[i][j], @"\d+").Value, NumberFormatInfo.InvariantInfo);
                             }
-                            
+
                         }
                         else if (fileContents[i][j].Contains("cache_line_size"))
                         {
@@ -498,7 +499,7 @@ namespace _562Homework2
                             }
                             results.LineSize = int.Parse(Regex.Match(fileContents[i][j], @"\d+").Value, NumberFormatInfo.InvariantInfo);
                         }
-                        else if(fileContents[i][j].Contains("a2time01"))
+                        else if (fileContents[i][j].Contains("a2time01"))
                         {
                             results.BenchMark = "a2time01";
                         }
@@ -526,10 +527,10 @@ namespace _562Homework2
                         {
                             lookForDCacheSize = true;
                         }
-                        else if(lookForDCacheSize && fileContents[i][j].Contains("size"))
+                        else if (lookForDCacheSize && fileContents[i][j].Contains("size"))
                         {
                             lookForDCacheSize = false;
-                            results.DCache = int.Parse(Regex.Match(fileContents[i][j], @"\d+").Value, NumberFormatInfo.InvariantInfo)/ 1024;
+                            results.DCache = int.Parse(Regex.Match(fileContents[i][j], @"\d+").Value, NumberFormatInfo.InvariantInfo) / 1024;
                         }
                         else if (fileContents[i][j].Contains("[system.cpu.icache]"))
                         {
