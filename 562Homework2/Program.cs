@@ -70,14 +70,14 @@ namespace _562Homework2
 
         double BaseIPC()
         {
-            if (object.ReferenceEquals(null, baseR))
+            if (baseR is null)
             {
                 Console.WriteLine("Error, base does not exist when attempting to access baseIPC");
                 return -1.0;
             }
             return baseR.IPC1;
         }
-        double bestIPC() => bestIPCR.IPC1;
+        double BestIPC() => bestIPCR.IPC1;
         double IPCImpovement()
         {
             return 100 * bestIPCR.IPCdifference1;
@@ -92,20 +92,20 @@ namespace _562Homework2
             return bestIPCR.DCache + "-" + bestIPCR.SetAssociative + "-" + bestIPCR.LineSize;
 
         }
-        string bestdCacheConfig()
+        string BestdCacheConfig()
         {
             //  return bestdCache.DCache + "-" + bestdCache.SetAssociative + "-" + bestdCache.LineSize + "-" + bestdCache.ICache;
             return bestdCache.DCache + "-" + bestdCache.SetAssociative + "-" + bestdCache.LineSize;
         }
-        double basedCacheMissRate() => baseR.DCacheMissRate;
-        double bestdCacheMissRate() => bestdCache.DCacheMissRate;
+        double BasedCacheMissRate() => baseR.DCacheMissRate;
+        double BestdCacheMissRate() => bestdCache.DCacheMissRate;
         public ResultsComputer()
         {
             listOfResults = new List<Results>();
         }
         public Results ResultExists(string fileName)
         {
-            if (object.ReferenceEquals(null, fileName))
+            if (fileName is null)
             {
                 Console.WriteLine("Error, gave null string for file name");
                 return null;
@@ -118,12 +118,14 @@ namespace _562Homework2
                     return listOfResults[i];
                 }
             }
-            Results temporaryResult = new Results(testNumber);
-            temporaryResult.Name = fileName;
+            Results temporaryResult = new Results(testNumber)
+            {
+                Name = fileName
+            };
             listOfResults.Add(temporaryResult);
             return temporaryResult;
         }
-        public Results setBase()
+        public Results SetBase()
         {
             int iCache = 32;
             int dCache = 32;
@@ -147,9 +149,9 @@ namespace _562Homework2
             }
             return baseR;
         }
-        public void findBest()
+        public void FindBest()
         {
-            if (object.ReferenceEquals(null, baseR))
+            if (baseR is null)
             {
                 Console.WriteLine("Error, null Base. Try setting the base first.");
                 return;
@@ -175,7 +177,7 @@ namespace _562Homework2
         }
         
   
-        private void findSizes(out List<int> cacheSizes, out List<int> setAssociative, out List<int> lineSizes)
+        private void FindSizes(out List<int> cacheSizes, out List<int> setAssociative, out List<int> lineSizes)
         {
             cacheSizes = new List<int>();
             setAssociative = new List<int>();
@@ -225,7 +227,7 @@ namespace _562Homework2
                 }
             }
         }
-        public string findHighestImpactBest()
+        public string FindHighestImpactBest()
         {
             List <BoolValues> usableStructure = new List<BoolValues>();
             List<double> lineSizeSTDs = new List<double>();
@@ -360,7 +362,7 @@ namespace _562Homework2
           return ret;
         }
 
-        private static double calculateDifferences(List<List<Results>> cacheSorted)
+        private static double CalculateDifferences(List<List<Results>> cacheSorted)
         {
             List<double> tempSum = new List<double>(cacheSorted.Count);
             for (int i = 0; i < cacheSorted.Count; i++)
@@ -396,7 +398,7 @@ namespace _562Homework2
             return product;
         }
 
-        public List<Results> getAllofCacheSize(int size)
+        public List<Results> GetAllofCacheSize(int size)
         {
             List<Results> temp = new List<Results>();
             for (int i = 0; i < this.listOfResults.Count; i++)
@@ -412,7 +414,7 @@ namespace _562Homework2
             }
             return temp;
         }
-        public List<Results> getsetAssociative(int size)
+        public List<Results> GetsetAssociative(int size)
         {
             List<Results> temp = new List<Results>();
             for (int i = 0; i < this.listOfResults.Count; i++)
@@ -428,7 +430,7 @@ namespace _562Homework2
             }
             return temp;
         }
-        public List<Results> getlineSizes(int size)
+        public List<Results> GetlineSizes(int size)
         {
             List<Results> temp = new List<Results>();
             for (int i = 0; i < this.listOfResults.Count; i++)
@@ -444,7 +446,7 @@ namespace _562Homework2
             }
             return temp;
         }
-        public void print()
+        public void Print()
         {
             string path = @"results";
             if (!Directory.Exists(path))  // if it doesn't exist, create
@@ -456,14 +458,14 @@ namespace _562Homework2
                 file.WriteLine("Group member: Edward Brunton");
                 file.WriteLine("Benchmark: " + BenchMark());
                 file.WriteLine("Base IPC: " + BaseIPC());
-                file.WriteLine("Best IPC: " + bestIPC());
+                file.WriteLine("Best IPC: " + BestIPC());
                 file.WriteLine("IPC improvement(%): " + IPCImpovement());
                 file.WriteLine("Best IPC configuration: " + BestIPCConfig());
-                file.WriteLine("Base dCache miss rate: " + basedCacheMissRate());
-                file.WriteLine("Best dCache miss rate: " + bestdCacheMissRate());
+                file.WriteLine("Base dCache miss rate: " + BasedCacheMissRate());
+                file.WriteLine("Best dCache miss rate: " + BestdCacheMissRate());
                 file.WriteLine("dCache miss rate improvement(%): " + DCachImprovement());
-                file.WriteLine("Best dCache configuration: " + bestdCacheConfig());
-                file.WriteLine("Highest impact parameter: " + findHighestImpactBest());//findHighestImpact());
+                file.WriteLine("Best dCache configuration: " + BestdCacheConfig());
+                file.WriteLine("Highest impact parameter: " + FindHighestImpactBest());//findHighestImpact());
             }
             using (System.IO.StreamWriter file = new System.IO.StreamWriter(BenchMark() + "rawdata" + ".txt"))
             {
@@ -491,7 +493,7 @@ namespace _562Homework2
     }
     class Program
     {
-        static double parseDouble(string something)
+        static double ParseDouble(string something)
         {
             int startIndex = -1;
             string useful = "";
@@ -538,7 +540,7 @@ namespace _562Homework2
             List<string> fileListFance = fileList.ToList();
             fileListFance.RemoveAll(item => item == null);
             ResultsComputer masterList = new ResultsComputer();
-            if(object.ReferenceEquals(null, fileListFance) || object.ReferenceEquals(null, fileContents))
+            if(fileListFance is null || fileContents is null)
              {
                 Console.WriteLine("Error: lists not initialized; missing data!");
             }
@@ -566,22 +568,22 @@ namespace _562Homework2
                             {
                                 missrate = true;
                             }
-                            results.DCacheMissRate = parseDouble(fileContents[i][j]);
+                            results.DCacheMissRate = ParseDouble(fileContents[i][j]);
                         }
                         else if (fileContents[i][j].Contains("system.cpu.ip"))
                         {
-                            if (ipc && (results.IPC1 != parseDouble(fileContents[i][j])))
+                            if (ipc && (results.IPC1 != ParseDouble(fileContents[i][j])))
                             {
                               
                                 Console.WriteLine("Error: double set the IPC");
                                 Console.WriteLine("Previous IPC: " + results.IPC1);
-                                Console.WriteLine("New IPC: " + parseDouble(fileContents[i][j]));
+                                Console.WriteLine("New IPC: " + ParseDouble(fileContents[i][j]));
                             }
                             else
                             {
                                 ipc = true;
                             }
-                            results.IPC1 = parseDouble(fileContents[i][j]); 
+                            results.IPC1 = ParseDouble(fileContents[i][j]); 
                         }
                        
                     }
@@ -688,9 +690,9 @@ namespace _562Homework2
                     Console.WriteLine("File name: " + fileListFance[i] + " could not be understood.");
                 }
             }
-            masterList.setBase();
-            masterList.findBest();
-            masterList.print();
+            masterList.SetBase();
+            masterList.FindBest();
+            masterList.Print();
             //system.cpu.dcache.overall_miss_rate::total for data cache miss rates
             //system.cpu.ip for IPC
         }
