@@ -125,30 +125,31 @@ namespace _562Homework2
             listOfResults.Add(temporaryResult);
             return temporaryResult;
         }
+        //this function sets the case for the base case (could be replaced in future by file read
         public Results SetBase()
         {
-            int iCache = 32;
-            int dCache = 32;
-            int assoc = 4;
-            int linesize = 64;
+            
+            int iCache = 32;//modify if different instruction cache base case
+            int dCache = 32;//modify if different data cache base case
+            int assoc = 4;//modify if different associativity base case
+            int linesize = 64;//modify if different line size base case
             for (int i = 0; i < listOfResults.Count; i++)
             {
                 if (listOfResults[i].DCache == dCache && listOfResults[i].SetAssociative == assoc
-                    && listOfResults[i].LineSize == linesize && listOfResults[i].ICache == iCache)
+                    && listOfResults[i].LineSize == linesize && listOfResults[i].ICache == iCache)//see if all the parameters are the ones that we are looking for
                 {
-
                     this.baseR = listOfResults[i];
-
-                    break;
+                    break;//only one base case test will exist, so quit now
                 }
             }
             if (this.baseR == null)
             {
-                Console.WriteLine("Error: could not find basline");
-                return null;
+                Console.WriteLine("Error: could not find basline");//evidence of serious issue
+                return null;//will crash the program later on.
             }
             return baseR;
         }
+        //finds the bast case relative to the base case
         public void FindBest()
         {
             if (baseR is null)
@@ -175,58 +176,8 @@ namespace _562Homework2
             }
 
         }
-        
-  
-        private void FindSizes(out List<int> cacheSizes, out List<int> setAssociative, out List<int> lineSizes)
-        {
-            cacheSizes = new List<int>();
-            setAssociative = new List<int>();
-            lineSizes = new List<int>();
-            for (int i = 0; i < this.listOfResults.Count; i++)
-            {
-                bool cacheSizeAlreadyExists = false;
-                bool setAssociativeAlreadyExists = false;
-                bool lineSizesAlreadyExists = false;
 
-                for (int j = 0; j < cacheSizes.Count; j++)
-                {
-                    if (listOfResults[i].DCache == cacheSizes[j])
-                    {
-                        cacheSizeAlreadyExists = true;
-                        break;
-                    }
-                }
-                if (!cacheSizeAlreadyExists)
-                {
-                    cacheSizes.Add(listOfResults[i].DCache);
-                }
-                for (int j = 0; j < setAssociative.Count; j++)
-                {
-
-                    if (listOfResults[i].SetAssociative == setAssociative[j])
-                    {
-                        setAssociativeAlreadyExists = true;
-                        break;
-                    }
-                }
-                if (!setAssociativeAlreadyExists)
-                {
-                    setAssociative.Add(listOfResults[i].SetAssociative);
-                }
-                for (int j = 0; j < lineSizes.Count; j++)
-                {
-                    if (listOfResults[i].LineSize == lineSizes[j])
-                    {
-                        lineSizesAlreadyExists = true;
-                        break;
-                    }
-                }
-                if (!lineSizesAlreadyExists)
-                {
-                    lineSizes.Add(listOfResults[i].LineSize);
-                }
-            }
-        }
+        //takes standard distribution of each different set of test and averages to find overal highest impact
         public string FindHighestImpactBest()
         {
             List <BoolValues> usableStructure = new List<BoolValues>();
@@ -240,12 +191,12 @@ namespace _562Homework2
             }
             for(int i =0; i < usableStructure.Count; i++)
             {
-                List<double> stdDiv = new List<double>();
-                List<double> stdDiv2 = new List<double>();
+                List<double> stdDivDcache = new List<double>();
+                List<double> stdDivIPC = new List<double>();
                 if (!usableStructure[i].CacheTested)
                 {
-                    stdDiv.Clear();
-                    stdDiv2.Clear();
+                    stdDivDcache.Clear();
+                    stdDivIPC.Clear();
                     for(int j = 0; j < usableStructure.Count; j ++)
                     {
                         if(j==i)
@@ -257,51 +208,51 @@ namespace _562Homework2
                             !usableStructure[j].CacheTested)
                         {
                             usableStructure[j].CacheTested = true;
-                            stdDiv.Add(usableStructure[j].ResultsPart.DCachedifference);
-                            stdDiv2.Add(usableStructure[j].ResultsPart.IPCdifference1);
+                            stdDivDcache.Add(usableStructure[j].ResultsPart.DCachedifference);
+                            stdDivIPC.Add(usableStructure[j].ResultsPart.IPCdifference1);
                         }
                     }
-                    if(stdDiv.Count >0)
+                    if(stdDivDcache.Count >0)
                     {
                         usableStructure[i].CacheTested = true;
-                        stdDiv.Add(usableStructure[i].ResultsPart.DCachedifference);
-                        stdDiv2.Add(usableStructure[i].ResultsPart.IPCdifference1);
-                        cacheSizeSTDs.Add(CalculateStdDev(stdDiv));
-                        cacheSizeSTDs.Add(CalculateStdDev(stdDiv2));
+                        stdDivDcache.Add(usableStructure[i].ResultsPart.DCachedifference);
+                        stdDivIPC.Add(usableStructure[i].ResultsPart.IPCdifference1);
+                        cacheSizeSTDs.Add(CalculateStdDev(stdDivDcache));
+                        cacheSizeSTDs.Add(CalculateStdDev(stdDivIPC));
                     }
                 }
                 if(!usableStructure[i].LineTested)
                 {
-                    stdDiv.Clear();
-                    stdDiv2.Clear();
+                    stdDivDcache.Clear();
+                    stdDivIPC.Clear();
                     for (int j = 0; j < usableStructure.Count; j++)
                     {
                         if (j == i)
                         {
-                            continue;
+                            continue;//do not compare agaisnt self
                         }
                         if (usableStructure[i].ResultsPart.DCache == usableStructure[j].ResultsPart.DCache && 
                             usableStructure[i].ResultsPart.SetAssociative == usableStructure[j].ResultsPart.SetAssociative &&
                             !usableStructure[j].LineTested)
                         {
                             usableStructure[j].LineTested = true;
-                            stdDiv.Add(usableStructure[j].ResultsPart.DCachedifference);
-                            stdDiv2.Add(usableStructure[j].ResultsPart.IPCdifference1);
+                            stdDivDcache.Add(usableStructure[j].ResultsPart.DCachedifference);
+                            stdDivIPC.Add(usableStructure[j].ResultsPart.IPCdifference1);
                         }
                     }
-                    if (stdDiv.Count > 0)
+                    if (stdDivDcache.Count > 0)
                     {
                         usableStructure[i].LineTested = true;
-                        stdDiv.Add(usableStructure[i].ResultsPart.DCachedifference);
-                        stdDiv2.Add(usableStructure[i].ResultsPart.IPCdifference1);
-                        setSizeSTDs.Add(CalculateStdDev(stdDiv));
-                        setSizeSTDs.Add(CalculateStdDev(stdDiv2));
+                        stdDivDcache.Add(usableStructure[i].ResultsPart.DCachedifference);
+                        stdDivIPC.Add(usableStructure[i].ResultsPart.IPCdifference1);
+                        setSizeSTDs.Add(CalculateStdDev(stdDivDcache));
+                        setSizeSTDs.Add(CalculateStdDev(stdDivIPC));
                     }
                 }
                 if(!usableStructure[i].SetTested)
                 {
-                    stdDiv.Clear();
-                    stdDiv2.Clear();
+                    stdDivDcache.Clear();
+                    stdDivIPC.Clear();
                     for (int j = 0; j < usableStructure.Count; j++)
                     {
                         if (j == i)
@@ -313,17 +264,17 @@ namespace _562Homework2
                             !usableStructure[j].SetTested)
                         {
                             usableStructure[j].SetTested = true;
-                            stdDiv.Add(usableStructure[j].ResultsPart.DCachedifference);
-                            stdDiv2.Add(usableStructure[j].ResultsPart.IPCdifference1);
+                            stdDivDcache.Add(usableStructure[j].ResultsPart.DCachedifference);
+                            stdDivIPC.Add(usableStructure[j].ResultsPart.IPCdifference1);
                         }
                     }
-                    if (stdDiv.Count > 0)
+                    if (stdDivDcache.Count > 0)
                     {
                         usableStructure[i].SetTested = true;
-                        stdDiv.Add(usableStructure[i].ResultsPart.DCachedifference);
-                        stdDiv2.Add(usableStructure[i].ResultsPart.IPCdifference1);
-                        lineSizeSTDs.Add(CalculateStdDev(stdDiv));
-                        lineSizeSTDs.Add(CalculateStdDev(stdDiv2));
+                        stdDivDcache.Add(usableStructure[i].ResultsPart.DCachedifference);
+                        stdDivIPC.Add(usableStructure[i].ResultsPart.IPCdifference1);
+                        lineSizeSTDs.Add(CalculateStdDev(stdDivDcache));
+                        lineSizeSTDs.Add(CalculateStdDev(stdDivIPC));
                     }
                 }
             }
@@ -360,91 +311,6 @@ namespace _562Homework2
              ret = Math.Sqrt((sum) / (values.Count()-1));   
           }   
           return ret;
-        }
-
-        private static double CalculateDifferences(List<List<Results>> cacheSorted)
-        {
-            List<double> tempSum = new List<double>(cacheSorted.Count);
-            for (int i = 0; i < cacheSorted.Count; i++)
-            {
-                List<Results> values = cacheSorted[i];
-                tempSum.Add(0);
-                for (int j = 0; j < values.Count; j++)
-                {
-                    Results value = values[j];
-                    if (value.DCachedifference > 0)
-                    {
-                        tempSum[i] += value.DCachedifference;
-                    }
-                    else
-                    {
-                        tempSum[i] -= value.DCachedifference;
-                    }
-                    if (value.IPCdifference1 > 0)
-                    {
-                        tempSum[i] += value.IPCdifference1;
-                    }
-                    else
-                    {
-                        tempSum[i] -= value.IPCdifference1;
-                    }
-                }
-            }
-            double product = 1.0;
-            for(int i = 0; i <tempSum.Count; i++)
-            {
-                product *= tempSum[i];
-            }
-            return product;
-        }
-
-        public List<Results> GetAllofCacheSize(int size)
-        {
-            List<Results> temp = new List<Results>();
-            for (int i = 0; i < this.listOfResults.Count; i++)
-            {
-                if(listOfResults[i].DCache == size)
-                {
-                    temp.Add(listOfResults[i]);
-                }
-            }
-            if(temp.Count == 0)
-            {
-                Console.WriteLine("Warning: Invalid cache size");
-            }
-            return temp;
-        }
-        public List<Results> GetsetAssociative(int size)
-        {
-            List<Results> temp = new List<Results>();
-            for (int i = 0; i < this.listOfResults.Count; i++)
-            {
-                if (listOfResults[i].SetAssociative == size)
-                {
-                    temp.Add(listOfResults[i]);
-                }
-            }
-            if (temp.Count == 0)
-            {
-                Console.WriteLine("Warning: Invalid set associative size");
-            }
-            return temp;
-        }
-        public List<Results> GetlineSizes(int size)
-        {
-            List<Results> temp = new List<Results>();
-            for (int i = 0; i < this.listOfResults.Count; i++)
-            {
-                if (listOfResults[i].LineSize == size)
-                {
-                    temp.Add(listOfResults[i]);
-                }
-            }
-            if (temp.Count == 0)
-            {
-                Console.WriteLine("Warning: Invalid line size");
-            }
-            return temp;
         }
         public void Print()
         {
