@@ -63,7 +63,6 @@ namespace _562Homework2
         Results bestIPCR;
         Results bestdCache;
         Results baseR;
-        string highestImpact;
         string BenchMark()
         {
             return baseR.BenchMark;
@@ -112,7 +111,6 @@ namespace _562Homework2
                 return null;
             }
             int testNumber = int.Parse(Regex.Match(fileName, @"\d+").Value, NumberFormatInfo.InvariantInfo);
-            //Convert.ToInt32(Regex.Replace(fileName, "-?[0-9]+", ""));
             for (int i = 0; i < listOfResults.Count; i++)
             {
                 if (listOfResults[i].TestNumber == testNumber)
@@ -176,98 +174,7 @@ namespace _562Homework2
 
         }
         
-        public string findHighestImpact()
-        {
-            List<int> cacheSizes, setAssociative, lineSizes;
-            findSizes(out cacheSizes, out setAssociative, out lineSizes);
-            List<List<Results>> cacheSorted = new List<List<Results>>();
-            List<List<Results>> setSorted = new List<List<Results>>();
-            List<List<Results>> lineSorted = new List<List<Results>>();
-
-
-            for (int i = 0; i < cacheSizes.Count; i++)
-            {
-                int k = cacheSizes[i];
-                cacheSorted.Add(getAllofCacheSize(k));
-            }
-            for (int i = 0; i < setAssociative.Count; i++)
-            {
-                int k = setAssociative[i];
-                setSorted.Add(getsetAssociative(k));
-            }
-            for (int i = 0; i < cacheSizes.Count; i++)
-            {
-                int k = lineSizes[i];
-                lineSorted.Add(getlineSizes(k));
-            }
-
-            double sumCache = calculateDifferences(cacheSorted);
-            double sumSet = calculateDifferences(setSorted);
-            double sumLine = calculateDifferences(lineSorted);
-            /*       for (int i = 0; i < setSorted.Count; i++)
-                    {
-                        for (int j = 0; j < setSorted[i].Count; j++)
-                        {
-                            if (setSorted[i][j].DCachedifference > 0)
-                            {
-                                sumSet += setSorted[i][j].DCachedifference;
-                            }
-                            else
-                            {
-                                sumSet -= setSorted[i][j].DCachedifference;
-                            }
-                            if (setSorted[i][j].IPCdifference1 > 0)
-                            {
-                                sumSet += setSorted[i][j].IPCdifference1;
-                            }
-                            else
-                            {
-                                sumSet -= setSorted[i][j].IPCdifference1;
-                            }
-                        }
-                    }
-                    for (int i = 0; i < setSorted.Count; i++)
-                    {
-                        for (int j = 0; j < lineSorted[i].Count; j++)
-                        {
-                            if (lineSorted[i][j].DCachedifference > 0)
-                            {
-                                sumLine += lineSorted[i][j].DCachedifference;
-                            }
-                            else
-                            {
-                                sumLine -= lineSorted[i][j].DCachedifference;
-                            }
-                            if (lineSorted[i][j].IPCdifference1 > 0)
-                            {
-                                sumLine += lineSorted[i][j].IPCdifference1;
-                            }
-                            else
-                            {
-                                sumLine -= lineSorted[i][j].IPCdifference1;
-                            }
-                        }
-                    }
-                    */
-            Console.WriteLine(sumLine);
-            Console.WriteLine(sumCache);
-            Console.WriteLine(sumSet);
-
-            if (sumLine < sumCache && sumLine < sumSet)
-            {
-                highestImpact = "Line Size";
-            }
-            else if (sumCache < sumLine && sumCache < sumSet)
-            {
-                highestImpact = "Cache Size";
-            }
-            else
-            {
-                highestImpact = "Set Associativity";
-            }
-            return highestImpact;
-        }
-       
+  
         private void findSizes(out List<int> cacheSizes, out List<int> setAssociative, out List<int> lineSizes)
         {
             cacheSizes = new List<int>();
@@ -438,56 +345,6 @@ namespace _562Homework2
 
             }
         }
-        public string findHighestImpactBetter()
-        {
-            List<int> cacheSizes, setAssociative, lineSizes;
-            findSizes(out cacheSizes, out setAssociative, out lineSizes);
-            double[,,] dCacheVals = new double[cacheSizes.Count, setAssociative.Count, lineSizes.Count];
-            double[,,] IPCVals = new double[cacheSizes.Count, setAssociative.Count, lineSizes.Count];
-            double[,] cacheDiffs = new double[setAssociative.Count, lineSizes.Count];
-            double[,] setDiffs = new double[cacheSizes.Count, lineSizes.Count];
-            double[,] lineDiffs = new double[cacheSizes.Count, setAssociative.Count];
-
-            for (int i =0; i <dCacheVals.GetLength(0); i++)
-            {
-                for (int j = 0; j < dCacheVals.GetLength(1); j++)
-                {
-                    for(int k =0; k< dCacheVals.GetLength(2); k++)
-                    {
-                        dCacheVals[i, j, k] = -1;
-                        IPCVals[i, j, k] = -1;
-                    }
-                }
-            }
-            for (int i = 0; i < this.listOfResults.Count; i++)
-            {
-                dCacheVals[cacheSizes.IndexOf(listOfResults[i].DCache), setAssociative.IndexOf(listOfResults[i].SetAssociative), lineSizes.IndexOf(listOfResults[i].LineSize)] = listOfResults[i].DCachedifference;
-                IPCVals[cacheSizes.IndexOf(listOfResults[i].DCache), setAssociative.IndexOf(listOfResults[i].SetAssociative), lineSizes.IndexOf(listOfResults[i].LineSize)] = listOfResults[i].DCachedifference;
-            }
-         /*   List<double> listStuff1 = new List<double>();
-            List<double> listStuff2 = new List<double>();
-            double sumDiff = 0.0;
-            for (int i = 0; i < dCacheVals.GetLength(0); i++)
-            {
-                for (int j = 0; j < dCacheVals.GetLength(1); j++)
-                {
-                    for (int k = 0; k < dCacheVals.GetLength(2); k++)
-                    {
-                            if (dCacheVals[i, j, k] != -1 && IPCVals[i, j, k] != -1)
-                            {
-                                listStuff1.Add(dCacheVals[i, j, k]);
-                                listStuff2.Add(IPCVals[i, j, k]);
-                            }
-                    }
-                    sumDiff += CalculateStdDev(listStuff1);
-                    sumDiff += CalculateStdDev(listStuff2);
-                    listStuff1.Clear();
-                    listStuff2.Clear();
-                }
-            }
-            Console.WriteLine(sumDiff);*/
-            return "";
-        }
         private double CalculateStdDev(List<double> values)
         {   
           double ret = 0;
@@ -630,28 +487,6 @@ namespace _562Homework2
                     file.WriteLine("");
                 }
             }
-        /*    using (System.IO.StreamWriter file = new System.IO.StreamWriter(BenchMark() + "rawdata" + ".cvs"))
-            {
-                // file.WriteLine("Base info: " + baseR.DCache + "-" + baseR.SetAssociative + "-" + baseR.LineSize + "-" + baseR.ICache);
-                file.WriteLine("Base info: " + baseR.DCache + "-" + baseR.SetAssociative + "-" + baseR.LineSize);
-
-                file.WriteLine("");
-                for (int i = 0; i < listOfResults.Count; i++)
-                {
-                    file.WriteLine("Test Number " + listOfResults[i].TestNumber);
-                    file.WriteLine("DCache " + listOfResults[i].DCache);
-                    file.WriteLine("Associativity " + listOfResults[i].SetAssociative);
-                    file.WriteLine("Line Size " + listOfResults[i].LineSize);
-                    file.WriteLine("Name " + listOfResults[i].Name);
-                    file.WriteLine("Associativity " + listOfResults[i].SetAssociative);
-                    file.WriteLine("IPC " + listOfResults[i].IPC1);
-                    file.WriteLine("ICache Size" + listOfResults[i].ICache);
-                    file.WriteLine("IPC Improvement " + listOfResults[i].IPCdifference1);
-                    file.WriteLine("DCache Miss Rate " + listOfResults[i].DCacheMissRate);
-                    file.WriteLine("DCache Improvement" + listOfResults[i].DCachedifference);
-                    file.WriteLine("");
-                }
-            }*/
         }
     }
     class Program
@@ -731,7 +566,7 @@ namespace _562Homework2
                             {
                                 missrate = true;
                             }
-                            results.DCacheMissRate = parseDouble(fileContents[i][j]);// Convert.ToDouble(Regex.Replace(fileContents[i][j], "/^[0-9]+(\\.[0-9]+)?$", ""));
+                            results.DCacheMissRate = parseDouble(fileContents[i][j]);
                         }
                         else if (fileContents[i][j].Contains("system.cpu.ip"))
                         {
@@ -746,7 +581,7 @@ namespace _562Homework2
                             {
                                 ipc = true;
                             }
-                            results.IPC1 = parseDouble(fileContents[i][j]); //Convert.ToDouble(Regex.Replace(fileContents[i][j], "/^[0-9]+(\\.[0-9]+)?$", ""));
+                            results.IPC1 = parseDouble(fileContents[i][j]); 
                         }
                        
                     }
@@ -774,7 +609,6 @@ namespace _562Homework2
                                 if (results.SetAssociative != int.Parse(Regex.Match(fileContents[i][j], @"\d+").Value, NumberFormatInfo.InvariantInfo))
                                 {
                                    // Console.WriteLine("Blocking reseting of associativity");
-
                                 }
                             }
                             else
@@ -795,7 +629,6 @@ namespace _562Homework2
                                 lineSize = true;
                             }
                             results.LineSize = int.Parse(Regex.Match(fileContents[i][j], @"\d+").Value, NumberFormatInfo.InvariantInfo);
-                            //Convert.ToInt32(Regex.Replace(fileContents[i][j], "-?[0-9]+", ""));
                         }
                         else if(fileContents[i][j].Contains("a2time01"))
                         {
