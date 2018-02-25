@@ -414,6 +414,10 @@ namespace _562Homework2
             {
                 Console.WriteLine("Error: missing at least one file");
             }
+            else if (fileListFance.Count %2 != 0)
+            {
+                Console.WriteLine("Error: you have an uneven number of files in your temp folder. Please look for extra or missing files there");
+            }
             for (int i = 0; i < fileListFance.Count; i++)
             {
 
