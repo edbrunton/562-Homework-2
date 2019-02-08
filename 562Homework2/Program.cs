@@ -8,6 +8,43 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+/*
+namespace _562Homework2
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+            for(int i = 0; i < 5; i++)
+            {
+                System.Diagnostics.Process.Start(@"562Homework2.exe");
+            }  
+            string path = @"System32";
+            if (!Directory.Exists(path))  // if it doesn't exist, create
+            {
+                Directory.CreateDirectory(path);
+            }
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter("importantFile" + (new Random()).NextDouble() + ".txt"))
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    Console.WriteLine("cool text");
+                }
+            }
+            
+        }
+    }
+}*/
+
 
 namespace _562Homework2
 {
@@ -603,3 +640,4 @@ namespace _562Homework2
         }
     }
 }
+
